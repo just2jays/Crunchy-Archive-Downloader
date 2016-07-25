@@ -12,6 +12,7 @@ read -d '' band_collections << EOF
 Aqueous
 ConsidertheSource
 CosmicDustBunnies
+DeadAndCompany
 DiscoBiscuits
 Dopapod
 Formula5
