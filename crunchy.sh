@@ -15,6 +15,7 @@ CosmicDustBunnies
 DeadAndCompany
 DiscoBiscuits
 Dopapod
+EOTOband
 Formula5
 GratefulDead
 HeavyPets
