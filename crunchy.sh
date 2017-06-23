@@ -39,6 +39,7 @@ TheMantras
 thewerks
 Twiddle
 UmphreysMcGee
+Ween
 EOF
 
 SCRIPT_DIR=~/Music/
