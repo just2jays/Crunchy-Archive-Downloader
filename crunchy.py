@@ -247,7 +247,6 @@ class CrunchyDownloader:
                 no_directory=False,
                 retries=3,
                 verbose=False,
-                silent=True
             )
             
             # Verify download
