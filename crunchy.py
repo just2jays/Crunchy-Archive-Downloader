@@ -7,6 +7,7 @@ Automatically downloads the latest shows from Archive.org for specified artists.
 import argparse
 import logging
 import os
+import shutil
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
@@ -264,7 +265,6 @@ class CrunchyDownloader:
             # Clean up partial download
             if show_dir.exists():
                 try:
-                    import shutil
                     shutil.rmtree(show_dir)
                     self.logger.info(f"Cleaned up partial download: {show_dir}")
                 except Exception as cleanup_error:
