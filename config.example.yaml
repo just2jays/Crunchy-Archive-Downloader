@@ -1,0 +1,27 @@
+# Example configuration file for Crunchy Archive Downloader
+# Copy this file to config.yaml and customize as needed
+
+# Collections to monitor and download from Archive.org
+# Each entry should be a valid Archive.org collection identifier
+# You can find collection identifiers by browsing https://archive.org/details/etree
+# and looking at the collection name in the URL
+
+collections:
+  # Jam bands
+  - GratefulDead
+  - Phish
+  - UmphreysMcGee
+  - StringCheeseIncident
+  - moe
+  - Ween
+  - DiscoBiscuits
+  
+  # Add more collections here
+  # - AnotherBand
+  # - YetAnotherBand
+
+# Notes:
+# - Collection names are case-sensitive
+# - Each collection should be on its own line with a leading dash (-)
+# - Lines starting with # are comments and will be ignored
+# - To disable a collection temporarily, just add # at the beginning of its line

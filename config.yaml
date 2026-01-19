@@ -1,0 +1,38 @@
+# Crunchy Archive Downloader Configuration
+# List of Archive.org collection identifiers for artists/bands
+
+collections:
+  - Aqueous
+  - ConsidertheSource
+  - CosmicDustBunnies
+  - DeadAndCompany
+  - DiscoBiscuits
+  - Dopapod
+  - EOTOband
+  - Formula5
+  - GratefulDead
+  - HeavyPets
+  - JoeRussosAlmostDead
+  - KellerWilliams
+  - KungFuband
+  - lespecial
+  - MaxCreek
+  - MisterFMusic
+  - moe
+  - MunMusic
+  - PhilLeshandFriends
+  - PigeonsPlayingPingPong
+  - Quactus
+  - Spafford
+  - StringCheeseIncident
+  - TeaLeafGreen
+  - TheBigWu
+  - TheBreakfast
+  - TheMantras
+  - thewerks
+  - Twiddle
+  - UmphreysMcGee
+  - Ween
+
+# Note: You can add or remove collections as needed.
+# Each collection name should match the Archive.org collection identifier.
