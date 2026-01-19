@@ -375,8 +375,8 @@ Examples:
     parser.add_argument(
         '-w', '--workers',
         type=int,
-        default=4,
-        help='Number of parallel download workers (default: 4)'
+        default=2,
+        help='Number of parallel download workers (default: 2)'
     )
     
     parser.add_argument(
