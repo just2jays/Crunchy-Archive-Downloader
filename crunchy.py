@@ -62,7 +62,9 @@ class CrunchyDownloader:
     
     def setup_logging(self):
         """Configure logging to both file and console."""
-        log_dir = self.download_dir / "logs"
+        # Place logs in the script's directory (repo root) instead of download dir
+        script_dir = Path(__file__).parent
+        log_dir = script_dir / "logs"
         log_dir.mkdir(parents=True, exist_ok=True)
         
         log_file = log_dir / f"crunchy_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
