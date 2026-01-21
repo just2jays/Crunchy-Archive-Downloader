@@ -194,6 +194,10 @@ If you're migrating from the old `crunchy.sh` script:
 **Problem**: Some shows fail to download
 - **Solution**: Check the log files in `<download_dir>/logs/` for details
 
+**Problem**: Download completed but directory not found
+- **Most likely cause**: The item might not have any MP3 files matching the *.mp3 glob pattern. The Archive.org library completes "successfully" (no exception) but creates no directory since there's nothing to download.
+
+
 ## Contributing
 
 Feel free to submit issues or pull requests to improve the downloader!

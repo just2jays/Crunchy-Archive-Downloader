@@ -256,6 +256,18 @@ class CrunchyDownloader:
                 # Count downloaded files
                 mp3_files = list(show_dir.glob('*.mp3'))
                 self.logger.info(f"Successfully downloaded {len(mp3_files)} MP3 files for {identifier}")
+                
+                # Set proper permissions so files can be modified later
+                try:
+                    # Set directory permissions to 775 (rwxrwxr-x)
+                    os.chmod(show_dir, 0o775)
+                    # Set file permissions to 664 (rw-rw-r--) for all downloaded files
+                    for mp3_file in mp3_files:
+                        os.chmod(mp3_file, 0o664)
+                    self.logger.debug(f"Set permissions for {identifier}")
+                except Exception as perm_error:
+                    self.logger.warning(f"Could not set permissions for {identifier}: {perm_error}")
+                
                 return True
             else:
                 self.logger.warning(f"Download completed but directory not found: {show_dir}")
