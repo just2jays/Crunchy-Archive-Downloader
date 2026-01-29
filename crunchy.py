@@ -5,6 +5,7 @@ Automatically downloads the latest shows from Archive.org for specified artists.
 """
 
 import argparse
+import json
 import logging
 import os
 import shutil
@@ -16,7 +17,7 @@ from typing import List, Set, Dict, Optional
 import yaml
 
 try:
-    from internetarchive import search_items, download
+    from internetarchive import search_items, download, get_item
 except ImportError:
     print("Error: internetarchive library not found.")
     print("Please install it with: pip install internetarchive")
@@ -52,6 +53,12 @@ class CrunchyDownloader:
         
         # Create download directory if it doesn't exist
         self.download_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Setup tracking file for downloaded shows
+        script_dir = Path(__file__).parent
+        log_dir = script_dir / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        self.identifiers_file = log_dir / "downloaded_shows.json"
         
         self.logger.info(f"Initialized Crunchy Downloader")
         self.logger.info(f"Download directory: {self.download_dir}")
@@ -123,24 +130,35 @@ class CrunchyDownloader:
     
     def get_existing_identifiers(self) -> Set[str]:
         """
-        Scan download directory to find all existing show identifiers.
+        Load previously downloaded show identifiers from tracking file.
         
         Returns:
             Set of existing identifier strings
         """
         existing = set()
         
-        if not self.download_dir.exists():
+        if not self.identifiers_file.exists():
+            self.logger.info("No tracking file found, starting fresh")
             return existing
         
-        # Walk through all subdirectories to find identifiers
-        for artist_dir in self.download_dir.iterdir():
-            if artist_dir.is_dir() and artist_dir.name != "logs":
-                for show_dir in artist_dir.iterdir():
-                    if show_dir.is_dir():
-                        existing.add(show_dir.name)
+        try:
+            with open(self.identifiers_file, 'r') as f:
+                data = json.load(f)
+                # Extract identifiers from the tracking data
+                for entry in data:
+                    if isinstance(entry, dict) and 'identifier' in entry:
+                        existing.add(entry['identifier'])
+                    elif isinstance(entry, str):
+                        # Support legacy format if needed
+                        existing.add(entry)
+            
+            self.logger.info(f"Found {len(existing)} previously downloaded show identifiers")
+        except json.JSONDecodeError as e:
+            self.logger.error(f"Error reading tracking file: {e}")
+            self.logger.info("Starting with empty tracking file")
+        except Exception as e:
+            self.logger.error(f"Unexpected error loading tracking file: {e}")
         
-        self.logger.info(f"Found {len(existing)} existing show identifiers")
         return existing
     
     def search_latest_shows(self, collection: str) -> List[Dict[str, str]]:
@@ -211,6 +229,70 @@ class CrunchyDownloader:
         
         return ''.join(safe_chars)
     
+    def has_mp3_files(self, identifier: str) -> bool:
+        """
+        Check if an Archive.org item has any MP3 files.
+        
+        Args:
+            identifier: Archive.org item identifier
+        
+        Returns:
+            True if item has MP3 files, False otherwise
+        """
+        try:
+            item = get_item(identifier)
+            # Check if any files have .mp3 extension
+            for file in item.files:
+                if file.get('name', '').lower().endswith('.mp3'):
+                    return True
+            return False
+        except Exception as e:
+            self.logger.warning(f"Could not check files for {identifier}: {e}")
+            # If we can't check, assume it might have MP3s to avoid false negatives
+            return True
+    
+    def save_downloaded_identifier(self, identifier: str, creator: str):
+        """
+        Save a downloaded show identifier to the tracking file.
+        
+        Args:
+            identifier: Archive.org item identifier
+            creator: Artist/creator name
+        """
+        try:
+            # Load existing data
+            data = []
+            if self.identifiers_file.exists():
+                with open(self.identifiers_file, 'r') as f:
+                    try:
+                        data = json.load(f)
+                    except json.JSONDecodeError:
+                        self.logger.warning("Could not read existing tracking file, starting fresh")
+                        data = []
+            
+            # Add new entry
+            entry = {
+                'identifier': identifier,
+                'creator': creator,
+                'downloaded_at': datetime.now().isoformat()
+            }
+            data.append(entry)
+            
+            # Save back to file
+            with open(self.identifiers_file, 'w') as f:
+                json.dump(data, f, indent=2)
+            
+            # Set proper permissions for the tracking file (rw-rw-r--)
+            try:
+                os.chmod(self.identifiers_file, 0o664)
+            except Exception as perm_error:
+                self.logger.warning(f"Could not set permissions for tracking file: {perm_error}")
+            
+            self.logger.debug(f"Saved identifier to tracking file: {identifier}")
+        
+        except Exception as e:
+            self.logger.error(f"Error saving identifier to tracking file: {e}")
+    
     def download_show(self, identifier: str, creator: str) -> bool:
         """
         Download a single show from Archive.org.
@@ -229,7 +311,12 @@ class CrunchyDownloader:
         # Check if already exists
         if show_dir.exists():
             self.logger.info(f"Show already exists, skipping: {identifier}")
-            return True
+            return None
+        
+        # Check if item has MP3 files before proceeding
+        if not self.has_mp3_files(identifier):
+            self.logger.info(f"Show {identifier} has no MP3 files, skipping")
+            return None
         
         if self.dry_run:
             self.logger.info(f"[DRY RUN] Would download: {identifier} to {show_dir}")
@@ -267,6 +354,9 @@ class CrunchyDownloader:
                     self.logger.debug(f"Set permissions for {identifier}")
                 except Exception as perm_error:
                     self.logger.warning(f"Could not set permissions for {identifier}: {perm_error}")
+                
+                # Save to tracking file
+                self.save_downloaded_identifier(identifier, creator)
                 
                 return True
             else:
@@ -320,6 +410,7 @@ class CrunchyDownloader:
         # Download shows in parallel
         successful = 0
         failed = 0
+        skipped = 0
         
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             # Submit all download tasks
@@ -332,8 +423,11 @@ class CrunchyDownloader:
             for future in as_completed(future_to_show):
                 identifier, creator = future_to_show[future]
                 try:
-                    if future.result():
+                    result = future.result()
+                    if result is True:
                         successful += 1
+                    elif result is None:
+                        skipped += 1
                     else:
                         failed += 1
                 except Exception as e:
@@ -344,8 +438,9 @@ class CrunchyDownloader:
         self.logger.info("=" * 60)
         self.logger.info(f"Download Summary:")
         self.logger.info(f"  Successful: {successful}")
+        self.logger.info(f"  Skipped: {skipped}")
         self.logger.info(f"  Failed: {failed}")
-        self.logger.info(f"  Total: {successful + failed}")
+        self.logger.info(f"  Total: {successful + skipped + failed}")
         self.logger.info("=" * 60)
         
         if failed > 0:
