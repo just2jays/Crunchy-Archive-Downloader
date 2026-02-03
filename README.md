@@ -180,6 +180,20 @@ If you're migrating from the old `crunchy.sh` script:
 3. The script will not re-download shows you already have
 4. You can safely run the new script alongside the old one
 
+## Updating Metadata and Tagging
+
+The script currently focuses on downloading MP3 files. Metadata tagging is not implemented yet but may be added in future releases.
+
+For now, you can use external tools like `beets` or `MusicBrainz Picard` to tag your downloaded files after the download process.
+
+The best process for this is to first use `sshfs` to mount the remote directory locally, then run your tagging tool on the mounted directory.
+
+**For example**:
+`sshfs jj@192.168.1.205:/mnt/ssd/music ~/Music/PiMusic -o local,reconnect,noappledouble`
+
+That command will mount the remote `/music/..` directory to your local `~/Music/PiMusic` folder, allowing your tagging tool to access the files as if they were local.
+
+
 ## Troubleshooting
 
 **Problem**: `ModuleNotFoundError: No module named 'internetarchive'`
