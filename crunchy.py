@@ -349,11 +349,13 @@ class CrunchyDownloader:
                     # Set directory permissions to 777 (rwxrwxrwx) - allows remote access
                     os.chmod(show_dir, 0o777)
                     # Set file permissions to 666 (rw-rw-rw-) - allows remote editing
+                    # Also update file timestamps to current time for proper "Recently Added" sorting
                     for mp3_file in mp3_files:
                         os.chmod(mp3_file, 0o666)
-                    self.logger.debug(f"Set permissions for {identifier}")
+                        os.utime(mp3_file, None)  # Sets modification time to current time
+                    self.logger.debug(f"Set permissions and timestamps for {identifier}")
                 except Exception as perm_error:
-                    self.logger.warning(f"Could not set permissions for {identifier}: {perm_error}")
+                    self.logger.warning(f"Could not set permissions/timestamps for {identifier}: {perm_error}")
                 
                 # Save to tracking file
                 self.save_downloaded_identifier(identifier, creator)
