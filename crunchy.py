@@ -282,9 +282,9 @@ class CrunchyDownloader:
             with open(self.identifiers_file, 'w') as f:
                 json.dump(data, f, indent=2)
             
-            # Set proper permissions for the tracking file (rw-rw-r--)
+            # Set proper permissions for the tracking file (rw-rw-rw-)
             try:
-                os.chmod(self.identifiers_file, 0o664)
+                os.chmod(self.identifiers_file, 0o777)
             except Exception as perm_error:
                 self.logger.warning(f"Could not set permissions for tracking file: {perm_error}")
             
@@ -348,10 +348,10 @@ class CrunchyDownloader:
                 try:
                     # Set directory permissions to 777 (rwxrwxrwx) - allows remote access
                     os.chmod(show_dir, 0o777)
-                    # Set file permissions to 666 (rw-rw-rw-) - allows remote editing
+                    # Set file permissions to 777 (rw-rw-rw-) - allows remote editing
                     # Also update file timestamps to current time for proper "Recently Added" sorting
                     for mp3_file in mp3_files:
-                        os.chmod(mp3_file, 0o666)
+                        os.chmod(mp3_file, 0o777)
                         os.utime(mp3_file, None)  # Sets modification time to current time
                     self.logger.debug(f"Set permissions and timestamps for {identifier}")
                 except Exception as perm_error:
