@@ -3,13 +3,13 @@
 
 collections:
   # - Aqueous
-  - BigShrimp
+  # - BigShrimp
   # - ConsidertheSource
   # - CosmicDustBunnies
   - DanielDonato
   # - DeadAndCompany
-  #- DiscoBiscuits
-  - DIZGO
+  # - DiscoBiscuits
+  # - DIZGO
   - DogsInAPile
   # - Dopapod
   - EggyMusic
@@ -18,7 +18,7 @@ collections:
   # - GooseBand
   # - GratefulDead
   # - HeavyPets
-  - HouseplantMusic
+  # - HouseplantMusic
   - JoeRussosAlmostDead
   # - KellerWilliams
   - KingGizzardAndTheLizardWizard
@@ -33,8 +33,8 @@ collections:
   # - PigeonsPlayingPingPong
   # - Quactus
   - Spafford
-  - SqueakyFeet
-  - Sqwerv
+  # - SqueakyFeet
+  # - Sqwerv
   # - StringCheeseIncident
   # - taperssection # Not an artist but collection of recordings from various artists
   - TapersChoice
